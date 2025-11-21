@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>試合タイマー（前半アナウンス後ブザー）</title>
+<style>
+  body { font-family: sans-serif; text-align: center; padding-top: 40px; }
+  #time { font-size: 80px; margin-top: 20px; }
+  #stage { font-size: 40px; margin-top: 20px; }
+  button { font-size: 30px; padding: 10px 20px; margin: 5px; }
+</style>
+</head>
+<body>
+
+<h1>試合タイマー</h1>
+
+<div id="stage">待機中</div>
+<div id="time">00:00</div>
+
+<button id="startBtn" onclick="startStage('前半')">前半開始</button>
+<button id="pauseBtn" onclick="togglePause()" disabled> 一時停止</button>
+<button id="resumeBtn" onclick="togglePause()" disabled>再開</button>
+<button id="halftimeBtn" onclick="startStage('後半')" disabled>後半開始</button>
+<button id="resetBtn" onclick="resetTimer()">リセット</button>
+
+<script>
+// ===========================
+// ブザー音（テスト用）
+function playBeep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+  oscillator.type = "square";
+  oscillator.frequency.value = 800;
+  gain.gain.value = 0.2;
+  oscillator.connect(gain);
+  gain.connect(ctx.destination);
+  oscillator.start();
+  setTimeout(() => { oscillator.stop(); }, 500);
+}
+
+// ===========================
+// 音声読み上げ（テスト用）
+function speak(text, callback=null) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "ja-JP";
+  utter.rate = 1.0;
+  if (callback) utter.onend = callback;
+  speechSynthesis.speak(utter);
+}
+
+// 音声読み上げ（テスト用）
+function speak_fast(text, callback=null) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "ja-JP";
+  utter.rate = 2.0;
+  if (callback) utter.onend = callback;
+  speechSynthesis.speak(utter);
+}
+
+// ===========================
+// タイマー構造
+const stageDurations = { '前半': 120, 'インターバル': 60, '後半': 120 };
+let currentStage = null;
+let startTime = null;
+let remaining = 0;
+let paused = false;
+let rafId = null;
+let playedSeconds = new Set();
+
+// ===========================
+// ステージ開始
+function startStage(stageName) {
+  cancelAnimationFrame(rafId);
+  currentStage = stageName;
+  remaining = stageDurations[stageName];
+  startTime = null; // タイマーはまだ開始しない
+  paused = false;
+  playedSeconds.clear();
+
+  document.getElementById("stage").innerText = stageName;
+  document.getElementById("pauseBtn").disabled = false;
+  document.getElementById("resumeBtn").disabled = true;
+
+  // 前半開始時だけアナウンス→ブザー→タイマー
+  if (stageName === '前半') {
+    speak("それでは試合を開始します。よーい。", () => {
+      playBeep();
+      setTimeout(startActualTimer, 500); // ブザー0.5秒後にタイマー開始
+    });
+  } else if (stageName === '後半') {
+    speak("それでは後半を開始します。よーい。", () => {
+      playBeep();
+      setTimeout(startActualTimer, 500); // ブザー0.5秒後にタイマー開始
+    });
+  } else {
+    // インターバルは即タイマー開始
+    startActualTimer();
+  }
+}
+
+// ===========================
+// タイマー本体
+function startActualTimer() {
+  startTime = performance.now();
+  updateTimer();
+}
+
+function updateTimer() {
+  if (paused) return;
+
+  const now = performance.now();
+  const elapsed = (now - startTime)/1000;
+  const secRemaining = Math.ceil(remaining - elapsed);
+
+  if (secRemaining <= 0) {
+    document.getElementById("time").innerText = "00:00";
+
+    // ステージ終了ブザー
+    if (currentStage === '前半' || currentStage === '後半') playBeep();
+    if (currentStage === '前半') speak(currentStage + "終了です。");
+    if (currentStage === '後半') speak("試合終了です。");
+
+    if (currentStage === '前半') document.getElementById("halftimeBtn").disabled = false;
+
+    currentStage = null;
+    document.getElementById("pauseBtn").disabled = true;
+    document.getElementById("resumeBtn").disabled = true;
+    return;
+  }
+
+  // 画面表示
+  const m = String(Math.floor(secRemaining / 60)).padStart(2,'0');
+  const s = String(secRemaining % 60).padStart(2,'0');
+  document.getElementById("time").innerText = `${m}:${s}`;
+
+  // 音声イベント
+  if (currentStage === '前半' || currentStage === '後半') {
+    if (secRemaining === 60 && !playedSeconds.has(60)) { speak("1分経過、残り時間1分です."); playedSeconds.add(60);}
+    if (secRemaining === 30 && !playedSeconds.has(30)) { speak(currentStage + "、残り30秒です."); playedSeconds.add(30);}
+    if (secRemaining <= 10 && secRemaining >= 1 && !playedSeconds.has(secRemaining)) { speak_fast(String(secRemaining)); playedSeconds.add(secRemaining);}
+  }
+
+  rafId = requestAnimationFrame(updateTimer);
+}
+
+// ===========================
+// 一時停止 / 再開
+function togglePause() {
+  if (!paused) {
+    paused = true;
+    cancelAnimationFrame(rafId);
+    document.getElementById("pauseBtn").disabled = true;
+    document.getElementById("resumeBtn").disabled = false;
+    remaining = Math.ceil(remaining - (performance.now() - startTime)/1000);
+  } else {
+    paused = false;
+    startTime = performance.now();
+    document.getElementById("pauseBtn").disabled = false;
+    document.getElementById("resumeBtn").disabled = true;
+    updateTimer();
+  }
+}
+
+// ===========================
+// リセット
+function resetTimer() {
+  cancelAnimationFrame(rafId);
+  currentStage = null;
+  remaining = 0;
+  paused = false;
+  playedSeconds.clear();
+  document.getElementById("time").innerText = "00:00";
+  document.getElementById("stage").innerText = "待機中";
+  document.getElementById("pauseBtn").disabled = true;
+  document.getElementById("resumeBtn").disabled = true;
+  document.getElementById("halftimeBtn").disabled = true;
+}
+</script>
+
+</body>
+</html>
