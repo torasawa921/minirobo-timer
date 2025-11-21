@@ -18,9 +18,9 @@
 <div id="time">00:00</div>
 
 <button id="startBtn" onclick="startStage('前半')">前半開始</button>
+<button id="halftimeBtn" onclick="startStage('後半')" disabled>後半開始</button>
 <button id="pauseBtn" onclick="togglePause()" disabled> 一時停止</button>
 <button id="resumeBtn" onclick="togglePause()" disabled>再開</button>
-<button id="halftimeBtn" onclick="startStage('後半')" disabled>後半開始</button>
 <button id="resetBtn" onclick="resetTimer()">リセット</button>
 
 <script>
@@ -153,8 +153,6 @@ function updateTimer() {
     currentStage = null;
     document.getElementById("pauseBtn").disabled = true;
     document.getElementById("resumeBtn").disabled = true;
-    document.getElementById("startBtn").disabled = true;
-    document.getElementById("halftimeBtn").disabled = true;
     return;
   }
 
