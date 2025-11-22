@@ -25,6 +25,29 @@
 
 <script>
 // ===========================
+// iPhone のオーディオ制限解除（最初のタップで解放）
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  oscillator.connect(gain);
+  gain.connect(ctx.destination);
+
+  oscillator.start();
+  oscillator.stop();
+
+  audioUnlocked = true;
+  console.log("Audio unlocked!");
+}
+
+// 画面のどこかをタップしたら実行
+document.addEventListener("touchstart", unlockAudio, { once: true });
+  
 // ブザー音（テスト用）
 function playBeep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -57,29 +80,6 @@ function speak_fast(text, callback=null) {
   if (callback) utter.onend = callback;
   speechSynthesis.speak(utter);
 }
-
-// iPhone のオーディオ制限解除（最初のタップで解放）
-let audioUnlocked = false;
-
-function unlockAudio() {
-  if (audioUnlocked) return;
-
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  oscillator.connect(gain);
-  gain.connect(ctx.destination);
-
-  oscillator.start();
-  oscillator.stop();
-
-  audioUnlocked = true;
-  console.log("Audio unlocked!");
-}
-
-  // 画面のどこかをタップしたら実行
-//document.addEventListener("touchstart", unlockAudio, { once: true });
   
 // ===========================
 // タイマー構造
