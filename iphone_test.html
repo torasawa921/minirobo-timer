@@ -143,12 +143,16 @@ function updateTimer() {
   if (secRemaining <= 0) {
     document.getElementById("time").innerText = "00:00";
 
-    // ステージ終了ブザー
-    if (currentStage === '前半' || currentStage === '後半') playBeep();
-    if (currentStage === '前半') speak(currentStage + "終了です。");
-    if (currentStage === '後半') speak("試合終了です。");
-
-    if (currentStage === '前半') document.getElementById("halftimeBtn").disabled = false;
+    // ステージ終了処理
+    if (currentStage === '前半'){
+      playBeep();
+      speak(currentStage + "終了です。");
+      document.getElementById("halftimeBtn").disabled = false;
+    }
+    if (currentStage === '後半') {
+      playBeep();
+      speak("試合終了です。");
+    }
 
     currentStage = null;
     document.getElementById("pauseBtn").disabled = true;
