@@ -36,7 +36,7 @@ function playBeep() {
   oscillator.connect(gain);
   gain.connect(ctx.destination);
   oscillator.start();
-  setTimeout(() => { oscillator.stop(); }, 1000);
+  setTimeout(() => { oscillator.stop(); }, 500);
 }
 
 // ===========================
@@ -90,12 +90,12 @@ function startStage(stageName) {
   if (stageName === '前半') {
       speak("それでは試合を開始します。よーい。", () => {
       playBeep();
-      setTimeout(startActualTimer, 1000); // ブザー0.5秒後にタイマー開始
+      setTimeout(startActualTimer, 500); // ブザー0.5秒後にタイマー開始
     });
   } else if (stageName === '後半') {
       speak("それでは後半を開始します。よーい。", () => {
       playBeep();
-      setTimeout(startActualTimer, 1000); // ブザー0.5秒後にタイマー開始
+      setTimeout(startActualTimer, 500); // ブザー0.5秒後にタイマー開始
     });
   } else {
     // インターバルは即タイマー開始
