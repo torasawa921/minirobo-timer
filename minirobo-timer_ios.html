@@ -53,7 +53,7 @@ function speak(text, callback=null) {
 function speak_fast(text, callback=null) {
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "ja-JP";
-  utter.rate = 1.6;
+  utter.rate = 1.4;
   if (callback) utter.onend = callback;
   speechSynthesis.speak(utter);
 }
