@@ -88,12 +88,12 @@ function startStage(stageName) {
 
   // 前後半の開始時はアナウンス→ブザー→タイマー
   if (stageName === '前半') {
-      speak("それでは試合を開始します。よぉい。", () => {
+      speak("それでは試合を開始します。よーい。", () => {
       playBeep();
       setTimeout(startActualTimer, 500); // ブザー0.5秒後にタイマー開始
     });
   } else if (stageName === '後半') {
-      speak("それでは後半を開始します。よぉい。", () => {
+      speak("それでは後半を開始します。よーい。", () => {
       playBeep();
       setTimeout(startActualTimer, 500); // ブザー0.5秒後にタイマー開始
     });
@@ -146,8 +146,8 @@ function updateTimer() {
   // 音声イベント
   if (currentStage === '前半' || currentStage === '後半') {
     if (secRemaining === 63 && !playedSeconds.has(63)) { speak("1分経過、残り時間1分です."); playedSeconds.add(63);}
-    if (secRemaining === 33 && !playedSeconds.has(33)) { speak(currentStage + "、残り30秒です."); playedSeconds.add(33);}
-    if (secRemaining === 13 && !playedSeconds.has(13)) { speak(currentStage + "、残り10秒です."); playedSeconds.add(13);}
+    if (secRemaining === 32 && !playedSeconds.has(32)) { speak(currentStage + "、残り30秒です."); playedSeconds.add(32);}
+    if (secRemaining === 12 && !playedSeconds.has(12)) { speak(currentStage + "、残り10秒です."); playedSeconds.add(12);}
     if (secRemaining <= 9 && secRemaining >= 1 && !playedSeconds.has(secRemaining)) { speak_fast(String(secRemaining)); playedSeconds.add(secRemaining);}
   }
 
